@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# cvd1-hf
-Analysis code for Olink CVD1 - HF analysis
-=======
 # Snakemake workflow: cvd1-hf
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
@@ -105,5 +101,3 @@ In case you have also changed or added steps, please consider contributing them 
 ## Testing
 
 Test cases are in the subfolder `.test`. They are automatically executed via continuous integration with [Github Actions](https://github.com/features/actions).
-
->>>>>>> master

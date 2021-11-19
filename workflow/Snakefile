@@ -7,12 +7,37 @@ report: "report/workflow.rst"
 # Allow users to fix the underlying OS via singularity.
 singularity: "docker://continuumio/miniconda3"
 
+configfile: "config/config.yaml"
 
 rule all:
-    input:
+    input: ["results/res_Observational.csv", "results/res_MR_aggregate.csv"]
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
 
+rule obs_analysis:
+    input:
+        "resources/data_Observational.csv"
+    output:
+        "results/res_Observational.csv"
+    script:
+        "scripts/Obs_analysis.R"
 
-include: "rules/common.smk"
-include: "rules/other.smk"
+rule MR_analysis:
+    input:
+        data_MR="resources/data_MR.csv",
+        ldrho="resources/cis200kb_ldrho/{protein}.ld",
+        snplist="resources/cis200kb_ldrho/{protein}.snplist"
+    # params:
+    #     helper_script="workflow/scripts/MR_functions.R"
+    output:
+        "results/MR/{protein}.csv"
+    script:
+        "scripts/MR_analysis.R"
+
+rule aggregate_MR:
+    input:
+        expand("results/MR/{protein}.csv", protein = config["target_protein_MR"])
+    output:
+        "results/res_MR_aggregate.csv"
+    shell:
+        "awk 'NR == FNR {{print; next}} FNR > 1 {{print}}' {input} > {output}"
