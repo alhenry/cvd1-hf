@@ -4,6 +4,24 @@ library(data.table)
 library(tidyverse)
 library(MendelianRandomization)
 
+# Install MR package
+MR_package_ver <- snakemake@config[["MR_package_ver"]]
+install_MR <- function(ver){
+  if (MR_package_ver == "latest"){
+    install.packages("MendelianRandomization")
+  else {
+    URL <- paste0("https://cran.r-project.org/src/contrib/Archive/MendelianRandomization/MendelianRandomization_",
+                MR_package_ver, ".tar.gz")
+    install.packages(URL, repos = NULL, type = "source")
+  }
+}
+
+if (!require("MendelianRandomization")){
+  install_MR()
+} else if(packageVersion("MendelianRandomization") != MR_package_ver) {
+  install_MR()
+}
+
 
 # Blank results
 error_df <- function(df_mr){
@@ -46,7 +64,7 @@ single.ins.MR <- function (df_mr, harmonise=F){
 MR_IVW <- function (df_mr, ldrho=matrix(), harmonise=F,  ...) {
   res <- tryCatch({
     if (harmonise) df_mr[, beta.y := ifelse(A1.x==A1.y, beta.y, -beta.y)]
-    
+
     # add correlation matrix to the model if LD rho is supplied
     MR.input <- mr_input(bx = df_mr[,beta.x],
                          bxse = df_mr[,se.x],
@@ -55,7 +73,7 @@ MR_IVW <- function (df_mr, ldrho=matrix(), harmonise=F,  ...) {
                          corr = ldrho,
                          snps = df_mr[,SNP])
     MR.output <- mr_ivw(MR.input, correl = TRUE, ...)
-    
+
     data.table(N_ins = MR.output@SNPs,
                beta = MR.output@Estimate,
                SE = MR.output@StdError,
@@ -73,16 +91,16 @@ MR_IVW <- function (df_mr, ldrho=matrix(), harmonise=F,  ...) {
 MR_Egger <- function (df_mr, ldrho=matrix(), harmonise=F, ...) {
   res <- tryCatch({
     if (harmonise) df_mr[, beta.y := ifelse(A1.x==A1.y, beta.y, -beta.y)]
-    
+
     MR.input <- mr_input(bx = df_mr[,beta.x],
                          bxse = df_mr[,se.x],
                          by = df_mr[,beta.y],
                          byse = df_mr[,se.y],
                          corr = ldrho,
                          snps = df_mr[,SNP])
-    
+
     MR.output <- mr_egger(MR.input, correl = TRUE, ...)
-    
+
     data.table(N_ins = MR.output@SNPs,
                beta = c(MR.output@Estimate, MR.output@Intercept),
                SE = c(MR.output@StdError.Est, MR.output@StdError.Int),
@@ -93,7 +111,7 @@ MR_Egger <- function (df_mr, ldrho=matrix(), harmonise=F, ...) {
   },
   error = function(e) rbind(error_df(df_mr), error_df(df_mr))
   )
-  
+
   res[, Method := c("MR_Egger", "EggerInt")]
   return(res)
 }
@@ -104,24 +122,24 @@ MR_Egger <- function (df_mr, ldrho=matrix(), harmonise=F, ...) {
 MR_PCA <- function(df_mr, ldrho, harmonise=F, var_exp=0.99){
   res <- tryCatch({
     if (harmonise) df_mr[, beta.y := ifelse(A1.x==A1.y, beta.y, -beta.y)]
-    
+
     attach(df_mr)
     Phi = (beta.x / se.y) %o% (beta.x / se.y) * ldrho
     # summary(prcomp(Phi, scale=FALSE))
-    
+
     K = which(cumsum(prcomp(Phi, scale=FALSE)$sdev^2 /
                        sum((prcomp(Phi, scale=FALSE)$sdev^2)))
               > var_exp)[1]
     # K is number of principal components to include in analysis
     # this code includes principal components to explain 99% of variance in the risk factor
-    
+
     betaXG0 = as.numeric(beta.x%*%prcomp(Phi, scale=FALSE)$rotation[,1:K])
     betaYG0 = as.numeric(beta.y%*%prcomp(Phi, scale=FALSE)$rotation[,1:K])
-    
+
     Omega = se.y %o% se.y * ldrho
-    
+
     pcOmega = t(prcomp(Phi, scale=FALSE)$rotation[,1:K])%*%Omega%*%prcomp(Phi, scale=FALSE)$rotation[,1:K]
-    
+
     #Calculate the MR beta and se
     beta_IVWcorrel.pc <- solve(t(betaXG0)%*%solve(pcOmega)%*%betaXG0)*t(betaXG0)%*%solve(pcOmega)%*%betaYG0
     beta_IVWcorrel.pc <- as.numeric(beta_IVWcorrel.pc)
@@ -132,9 +150,9 @@ MR_PCA <- function(df_mr, ldrho, harmonise=F, var_exp=0.99){
     P_value = 2*pnorm(-abs(Z_score))
     LCI <- beta_IVWcorrel.pc - qnorm(0.975)*se_IVWcorrel.fixed.pc
     UCI <- beta_IVWcorrel.pc + qnorm(0.975)*se_IVWcorrel.fixed.pc
-    
+
     detach(df_mr)
-    
+
     data.table(N_ins = nrow(df_mr),
                beta = beta_IVWcorrel.pc,
                SE = se_IVWcorrel.fixed.pc,
@@ -143,7 +161,7 @@ MR_PCA <- function(df_mr, ldrho, harmonise=F, var_exp=0.99){
   },
   error = function(e) error_df(df_mr)
   )
-  
+
   return (res)
 }
 
@@ -156,24 +174,24 @@ run_MR_all <- function(df_mr, ldrho){
     res <- single.ins.MR(df_mr)
     res[, `:=`(Method = "Wald_1Ins")]
   } else {
-  
+
     insSNPs <- df_mr$SNP
-    
+
     ldrho_ins <- ldrho[insSNPs, insSNPs]
-    
+
     # Exclude SNP if LDcorr results in NaN
     NaN_ins <- which(is.nan(ldrho_ins), T) %>% rownames
     if (!is.null(NaN_ins)){
       ins <- rownames(ldrho_ins) %>% .[which(!. %in% NaN_ins)]
       ldrho_ins <- ldrho_ins[ins, ins]
-      
+
       df_mr <- df_mr[SNP %in% ins]
     }
-    
+
     res_IVW <- MR_IVW(df_mr, ldrho=ldrho_ins, harmonise = F)
     res_IVW[, Method := "IVW"]
     res_Egger <- MR_Egger(df_mr, ldrho=ldrho_ins, harmonise = F)
-    
+
     res_PCA_0.99 <- MR_PCA(df_mr, ldrho_ins, harmonise = F, var_exp=0.99) %>%
       .[, `:=`(Method = "PCA_0.99")]
 
@@ -184,5 +202,3 @@ run_MR_all <- function(df_mr, ldrho){
   }
   return(res)
 }
-
-

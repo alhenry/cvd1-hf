@@ -41,5 +41,8 @@ vignettes/*.pdf
 # Snakemake cache
 .snakemake
 
+# R project file
+*.Rproj
+
 # intermediate results files
 results/MR/

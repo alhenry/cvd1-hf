@@ -1,6 +1,9 @@
 # This file should contain everything to configure the workflow on a global scale.
-# In case of sample based data, it should be complemented by a samples.tsv file that contains
-# one row per sample. It can be parsed easily via pandas.
+
+# select package versions available on CRAN (https://cran.r-project.org/src/contrib/Archive/MendelianRandomization/)
+# example: 0.4.0 (default to latest version)
+MR_package_ver: latest
+
 target_protein_MR:
   - ADM
   - AGRP
