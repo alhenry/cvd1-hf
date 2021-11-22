@@ -3,8 +3,7 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 [![Build Status](https://travis-ci.org/snakemake-workflows/cvd1-hf.svg?branch=master)](https://travis-ci.org/snakemake-workflows/cvd1-hf)
 
-This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
-Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+A snakemake workflow to reproduce analysis for the Olink CVD-1 - HF project
 
 ## Authors
 
@@ -12,92 +11,82 @@ Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs
 
 ## Usage
 
-If you use this workflow in a paper, don't forget to give credits to the authors by citing the URL of this (original) repository and, if available, its DOI (see above).
+The following describes a step-by-step procedure to reproduce the analysis.
+Code blocks represent input commands for command line interface (e.g. Terminal app on Mac OS)
 
-### Step 1: Obtain a copy of this workflow
+### Step 1: Install Conda & Snakemake
 
-1. Create a new github repository using this workflow [as a template](https://help.github.com/en/articles/creating-a-repository-from-a-template).
-2. [Clone](https://help.github.com/en/articles/cloning-a-repository) the newly created repository to your local system, into the place where you want to perform the data analysis.
+Install [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) / [Miniconda](https://docs.conda.io/en/latest/miniconda.html) (recommended for a fresh installation)
 
-### Step 2: Configure workflow
-
-Configure the workflow according to your needs via editing the files in the `config/` folder. Adjust `config.yaml` to configure the workflow execution, and `samples.tsv` to specify your sample setup.
-
-### Step 3: Install Snakemake
-
-Install Snakemake using [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html):
+Install Snakemake using:
 
     conda create -c bioconda -c conda-forge -n snakemake snakemake
 
 For installation details, see the [instructions in the Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
-### Step 4: Execute workflow
+
+### Step 2: Obtain a copy of this workflow
+
+Using `git`, [clone](https://help.github.com/en/articles/cloning-a-repository) this repository to your local system:
+
+    git clone https://github.com/alhenry/cvd1-hf.git
+
+Enter the newly creted (cloned) directory:
+
+    cd cvd1-hf
+
+
+### Step 3: Execute workflow
 
 Activate the conda environment:
 
     conda activate snakemake
 
-Test your configuration by performing a dry-run via
-
-    snakemake --use-conda -n
 
 Execute the workflow locally via
 
-    snakemake --use-conda --cores $N
-
-using `$N` cores or run it in a cluster environment via
-
-    snakemake --use-conda --cluster qsub --jobs 100
-
-or
-
-    snakemake --use-conda --drmaa --jobs 100
-
-If you not only want to fix the software stack but also the underlying OS, use
-
-    snakemake --use-conda --use-singularity
-
-in combination with any of the modes above.
-See the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/executable.html) for further details.
-
-### Step 5: Investigate results
-
-After successful execution, you can create a self-contained interactive HTML report with all results via:
-
-    snakemake --report report.html
-
-This report can, e.g., be forwarded to your collaborators.
-An example (using some trivial test data) can be seen [here](https://cdn.rawgit.com/snakemake-workflows/rna-seq-kallisto-sleuth/master/.test/report.html).
-
-### Step 6: Commit changes
-
-Whenever you change something, don't forget to commit the changes back to your github copy of the repository:
-
-    git commit -a
-    git push
-
-### Step 7: Obtain updates from upstream
-
-Whenever you want to synchronize your workflow copy with new developments from upstream, do the following.
-
-1. Once, register the upstream repository in your local copy: `git remote add -f upstream git@github.com:snakemake-workflows/cvd1-hf.git` or `git remote add -f upstream https://github.com/snakemake-workflows/cvd1-hf.git` if you do not have setup ssh keys.
-2. Update the upstream version: `git fetch upstream`.
-3. Create a diff with the current version: `git diff HEAD upstream/master workflow > upstream-changes.diff`.
-4. Investigate the changes: `vim upstream-changes.diff`.
-5. Apply the modified diff via: `git apply upstream-changes.diff`.
-6. Carefully check whether you need to update the config files: `git diff HEAD upstream/master config`. If so, do it manually, and only where necessary, since you would otherwise likely overwrite your settings and samples.
+    snakemake --use-conda -c all
 
 
-### Step 8: Contribute back
+### Step 4: Inspect results
 
-In case you have also changed or added steps, please consider contributing them back to the original repository:
+A successful execution should create a `results` folder containing 2 files:
+`res_Observational.csv` (observational results) and `res_MR_aggregate.csv` (MR results)
 
-1. [Fork](https://help.github.com/en/articles/fork-a-repo) the original repo to a personal or lab account.
-2. [Clone](https://help.github.com/en/articles/cloning-a-repository) the fork to your local system, to a different place than where you ran your analysis.
-3. Copy the modified files from your analysis to the clone of your fork, e.g., `cp -r workflow path/to/fork`. Make sure to **not** accidentally copy config file contents or sample sheets. Instead, manually update the example config files if necessary.
-4. Commit and push your changes to your fork.
-5. Create a [pull request](https://help.github.com/en/articles/creating-a-pull-request) against the original repository.
 
-## Testing
+## Notes
 
-Test cases are in the subfolder `.test`. They are automatically executed via continuous integration with [Github Actions](https://github.com/features/actions).
+### Can I run the workflow without snakemake?
+
+Yes, but it requires some tweaks and some familiarity with R.
+The main analysis scripts are located in the `workflow/scripts/` folder.
+These are standard R scripts embedded in a snakemake pipeline, which can be modified by substituting the relevant snakemake objects with local objects to run specific parts of the analysis.
+
+### Change in mr_egger() function in MendelianRandomization package
+
+The sensitivity analysis performed in the present analysis involves running
+a MR-Egger regression accounting for correlation between instruments
+with `mr_egger(correl = TRUE)` function implemented in `MendelianRandomization` package.
+
+It was recently discovered that there was a minor bug in the `mr_egger(correl = TRUE)` function in which the signs from standardised instrument ratio estimates and correlation matrix are not aligned.
+
+This bug was fixed in the `MendelianRandomization` version `0.4.1` and later, which is now set as the default of this workflow.
+For backward reproducibility with earlier version before the fix was introduced,
+these settings can be changed by modifying `MR_package_ver` in the `config.yaml` file to an earlier valid version of the package e.g. `0.4.0` (Note that this will force a system-wide installation of the specified version of the package).
+
+### Configuring the workflow
+
+As part of the multiverse sensitivity analysis, this workflow is designed to run up to 150 combinations of instrument selection parameters and MR models per protein.
+To speed up this computation, the workflow is modularised so that protein-specific analysis can be run separately.
+The target proteins for analysis can be configured by modifying the `target_protein_MR` list in the `config.yaml` file (default to all)
+
+### Package dependencies
+In addition to `conda`, `snakemake`, and `R`, this workflows uses the following `R` packages:
+- [`tidyverse`](https://www.tidyverse.org/)
+- [`data.table`](https://rdatatable.gitlab.io/data.table/)
+- [`metafor`](https://cran.r-project.org/web/packages/metafor/index.html)
+- [`MendelianRandomization`](https://cran.r-project.org/web/packages/MendelianRandomization/index.html)
+
+If local installation of R and these packages are already present,
+the workflow can be run using local system installation by ommiting the `--use-conda` argument, i.e.:
+    snakemake -c all
