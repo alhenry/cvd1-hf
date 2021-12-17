@@ -89,4 +89,5 @@ In addition to `conda`, `snakemake`, and `R`, this workflows uses the following 
 
 If local installation of R and these packages are already present,
 the workflow can be run using local system installation by ommiting the `--use-conda` argument, i.e.:
+
     snakemake -c all
