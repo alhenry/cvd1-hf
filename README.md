@@ -1,5 +1,6 @@
 # CVD1-HF analysis
 
+[![DOI](https://zenodo.org/badge/429122036.svg)](https://zenodo.org/badge/latestdoi/429122036)
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 
 A snakemake workflow to reproduce analysis for the Olink CVD-1 - HF project
