@@ -95,4 +95,4 @@ the workflow can be run using local system installation by ommiting the `--use-c
     snakemake -c all
 
 ### Acknowledgements
-Codes for MR with principal component instruments were adapted from [Burgess S et al (2017)[https://onlinelibrary.wiley.com/doi/10.1002/gepi.22077]]
+Codes for MR with principal component instruments were adapted from [Burgess S et al (2017)](https://onlinelibrary.wiley.com/doi/10.1002/gepi.22077])
