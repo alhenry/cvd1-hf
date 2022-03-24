@@ -33,7 +33,7 @@ Using `git`, [clone](https://help.github.com/en/articles/cloning-a-repository) t
 
     git clone https://github.com/alhenry/cvd1-hf.git
 
-Enter the newly creted (cloned) directory:
+Enter the newly created (cloned) directory:
 
     cd cvd1-hf
 
@@ -93,3 +93,6 @@ If local installation of R and these packages are already present,
 the workflow can be run using local system installation by ommiting the `--use-conda` argument, i.e.:
 
     snakemake -c all
+
+### Acknowledgements
+Codes for MR with principal component instruments were adapted from [Burgess S et al (2017)[https://onlinelibrary.wiley.com/doi/10.1002/gepi.22077]]
