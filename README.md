@@ -5,6 +5,8 @@
 
 A snakemake workflow to reproduce analysis for the Olink CVD-1 - HF project
 
+### :bangbang: Read the full, open-access paper on [Circulation](https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.121.056663)
+
 ## Authors
 
 * Albert Henry (@alhenry)
