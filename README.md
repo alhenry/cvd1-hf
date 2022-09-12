@@ -1,9 +1,11 @@
-# Snakemake workflow: cvd1-hf
+# CVD1-HF analysis
 
+[![DOI](https://zenodo.org/badge/429122036.svg)](https://zenodo.org/badge/latestdoi/429122036)
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/snakemake-workflows/cvd1-hf.svg?branch=master)](https://travis-ci.org/snakemake-workflows/cvd1-hf)
 
 A snakemake workflow to reproduce analysis for the Olink CVD-1 - HF project
+
+### :bangbang: Read the full, open-access paper on [Circulation](https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.121.056663)
 
 ## Authors
 
@@ -31,7 +33,7 @@ Using `git`, [clone](https://help.github.com/en/articles/cloning-a-repository) t
 
     git clone https://github.com/alhenry/cvd1-hf.git
 
-Enter the newly creted (cloned) directory:
+Enter the newly created (cloned) directory:
 
     cd cvd1-hf
 
@@ -89,4 +91,8 @@ In addition to `conda`, `snakemake`, and `R`, this workflows uses the following 
 
 If local installation of R and these packages are already present,
 the workflow can be run using local system installation by ommiting the `--use-conda` argument, i.e.:
+
     snakemake -c all
+
+### Acknowledgements
+Codes for MR with principal component instruments were adapted from [Burgess S et al (2017)](https://onlinelibrary.wiley.com/doi/10.1002/gepi.22077])
